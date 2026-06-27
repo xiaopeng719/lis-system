@@ -1,0 +1,104 @@
+version: "3.8"
+
+services:
+  # ========== SQL Server 2022 ==========
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lis-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Lis@2026Strong!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Lis@2026Strong!" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # ========== EMQX MQTT Broker ==========
+  emqx:
+    image: emqx/emqx:5.8
+    container_name: lis-emqx
+    ports:
+      - "1883:1883"     # MQTT
+      - "8083:8083"     # WebSocket
+      - "8883:8883"     # MQTT SSL
+      - "18083:18083"   # EMQX Dashboard
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
+    environment:
+      - EMQX_NAME=lis-emqx
+      - EMQX_HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  # ========== Redis ==========
+  redis:
+    image: redis:7-alpine
+    container_name: lis-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ========== FastAPI Backend ==========
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lis-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=mssql+pyodbc://sa:Lis@2026Strong!@sqlserver:1433/lis_db?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+      - REDIS_URL=redis://redis:6379/0
+      - MQTT_BROKER_HOST=emqx
+      - MQTT_BROKER_PORT=1883
+      - SECRET_KEY=lis-secret-key-change-in-production-2026
+      - DEBUG=true
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      emqx:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ========== React Frontend ==========
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lis-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+  emqx_data:
+  emqx_log:
+  redis_data:

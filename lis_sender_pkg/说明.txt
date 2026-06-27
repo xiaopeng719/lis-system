@@ -1,0 +1,54 @@
+# LIS 仪器结果通讯工具
+
+## 功能
+从 Excel 表格读取仪器检验结果，通过 MQTT 协议发送到 LIS 系统，自动入库。
+
+## 文件说明
+- `lis_sender_gui.py` — **带界面的通讯程序**（推荐）
+- `instrument_sender.py` — 命令行版本（高级用户）
+- `打包.bat` — 一键打包成 EXE（在 Windows 上运行）
+- `requirements.txt` — Python 依赖
+
+## 快速使用
+
+### 方式一：打包成 EXE（推荐，给其他人用）
+1. 在 Windows 电脑上安装 Python 3.8+（下载时勾选 "Add to PATH"）
+2. 把整个 `lis_sender_pkg` 文件夹复制到 Windows 电脑
+3. 双击 `打包.bat`
+4. 等待完成，生成的 EXE 在 `dist\LIS通讯工具.exe`
+5. 把 `LIS通讯工具.exe` 复制到任何 Windows 电脑都能直接运行
+
+### 方式二：直接运行（需要 Python 环境）
+```
+pip install openpyxl paho-mqtt
+python lis_sender_gui.py
+```
+
+### 方式三：命令行（批量/定时任务）
+```
+python instrument_sender.py 你的文件.xlsx
+python instrument_sender.py 你的文件.xlsx --broker 192.168.1.100
+python instrument_sender.py 你的文件.xlsx --instrument CBC-001 --dry-run
+```
+
+## Excel 格式要求
+| 样品编号 | 项目名称 | 结果 |
+|---------|---------|------|
+| SP001   | WBC     | 6.8  |
+| SP001   | GLU     | 5.2  |
+| SP002   | ALT     | 35   |
+
+- 第1列：样品编号/条码（自动识别含"样品"、"编号"、"条码"等关键字的表头）
+- 第2列：项目名称或编码（支持中文名称自动转换，如"葡萄糖"→GLU）
+- 第3列：结果值
+
+## 支持的项目名称
+可直接使用编码（WBC、GLU、ALT 等），也可用中文名：
+- 血常规：白细胞(WBC)、红细胞(RBC)、血红蛋白(HGB)、血小板(PLT)...
+- 生化：葡萄糖(GLU)、谷丙转氨酶(ALT)、肌酐(CRE)、尿素氮(BUN)...
+- 电解质：钾(K)、钠(Na)、氯(Cl)、钙(Ca)...
+
+## 连接设置
+- **Broker 地址**：LIS 服务器的 IP，如 `192.168.169.129`
+- **端口**：1883（默认）
+- **仪器编码**：LIS 系统中注册的仪器编码，如 `CHEM-001`
