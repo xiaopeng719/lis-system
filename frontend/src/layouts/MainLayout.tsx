@@ -18,6 +18,7 @@ import {
   BellOutlined,
   WarningOutlined,
   CloseCircleOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,6 +36,7 @@ const allMenuItems = [
   { key: '/qc', icon: <BugOutlined />, label: '质控管理', perm: 'qc:manage' },
   { key: '/base-data', icon: <DatabaseOutlined />, label: '基础数据', perm: 'base_data:edit' },
   { key: '/users', icon: <TeamOutlined />, label: '员工管理', perm: 'user:manage' },
+  { key: '/settings', icon: <SettingOutlined />, label: '系统设置', perm: 'base_data:edit' },
   { key: '/audit-logs', icon: <AuditOutlined />, label: '操作日志', perm: 'audit:view' },
 ];
 

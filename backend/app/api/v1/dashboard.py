@@ -122,10 +122,10 @@ async def get_tat_stats(
         {
             "label": row.category or "其他",
             "count": row.specimen_count,
-            "avg_minutes": max(0, round(float(row.avg_tat_minutes), 1)) if row.avg_tat_minutes else 0,
+            "avg_minutes": round(abs(float(row.avg_tat_minutes)), 1) if row.avg_tat_minutes else 0,
         }
         for row in rows
-        if row.avg_tat_minutes and float(row.avg_tat_minutes) > 0
+        if row.avg_tat_minutes
     ]
 
 

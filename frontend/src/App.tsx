@@ -12,6 +12,7 @@ import BaseDataPage from './pages/BaseDataPage';
 import QCPage from './pages/QCPage';
 import AuditLogPage from './pages/AuditLogPage';
 import UserManagePage from './pages/UserManagePage';
+import SettingsPage from './pages/SettingsPage';
 import { Spin } from 'antd';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -43,6 +44,7 @@ export default function App() {
                     <Route path="/qc" element={<QCPage />} />
                     <Route path="/audit-logs" element={<AuditLogPage />} />
                     <Route path="/users" element={<UserManagePage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/base-data" element={<BaseDataPage />} />
                   </Routes>
                 </MainLayout>

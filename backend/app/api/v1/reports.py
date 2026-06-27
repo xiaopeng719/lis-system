@@ -12,6 +12,7 @@ from app.models.test_item import TestItem
 from app.schemas import TestReportResponse
 from app.utils.helpers import generate_report_no
 from app.utils.permissions import check_permission_or_raise
+from app.utils.settings import get_setting
 from app.api.v1.auth import get_current_user
 
 router = APIRouter()
@@ -108,6 +109,7 @@ async def generate_report(specimen_id: int, db: AsyncSession = Depends(get_db)):
 
     report_no = generate_report_no()
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    hospital_name = get_setting("hospital_name") or "XX医院检验科"
     report_html = f"""
     <!DOCTYPE html>
     <html><head><meta charset="utf-8"><style>
@@ -145,7 +147,7 @@ async def generate_report(specimen_id: int, db: AsyncSession = Depends(get_db)):
     </style></head><body>
     <div class="report">
         <div class="header">
-            <div class="hospital-name">XX医院检验科</div>
+            <div class="hospital-name">{hospital_name}</div>
             <div class="report-title">检验报告单</div>
             <div class="report-no">报告编号：{report_no} &nbsp;&nbsp; 打印时间：{now_str}</div>
         </div>
@@ -176,8 +178,8 @@ async def generate_report(specimen_id: int, db: AsyncSession = Depends(get_db)):
         </table>
 
         <div class="footer">
-            <div class="sig"><span class="label">检验者：</span>____________</div>
-            <div class="sig"><span class="label">审核者：</span>____________</div>
+            <div class="sig"><span class="label">检验者：</span>{specimen.receiver or '____________'}</div>
+            <div class="sig"><span class="label">审核者：</span>{'____________'}</div>
             <div class="sig"><span class="label">报告日期：</span>{now_str}</div>
         </div>
 
